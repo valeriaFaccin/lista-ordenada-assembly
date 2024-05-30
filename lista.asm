@@ -96,6 +96,7 @@ fim:
 	li a7, 93		# Comando para encerrar programa
 	ecall			# Chama OS
 
+insere_inteiro:
 
 #################################################################
 # Função: int insere_inteiro(int *head, int valor)		#
@@ -155,4 +156,3 @@ imprime_lista:
 estatistica:
 	la a0, n_implementado
 	ret
-	
