@@ -8,6 +8,7 @@
 
 		.data
 		#estatisticas
+
 qtd_inserido:	.word 0
 qtd_removido:	.word 0
 head:		.word 0
@@ -29,7 +30,7 @@ op2:		.ascii "2 - Remover por indice\n"
 op3:		.ascii "3 - Remover por valor\n"
 op4:		.ascii "4 - Imprimir lista\n"
 op5:		.ascii "5 - Estatísticas\n"
-op6:		.asciz "6 - Sair\n"
+op6:		.asciz  "6 - Sair\n"
 
 		.text
 main:
@@ -102,10 +103,24 @@ fim:
 #   e atualiza a estatística numeros inseridos			#
 # entrada: a0 - ponteiro head					#
 #	   a1 - valor						#
-# saida: retorna o inteiro inserido				#
+# saida: retorna o indice inserido				#
 #################################################################
 
 insere_inteiro:
+	lw t0, 0(a0) 
+	mv t1, a0 
+	beqz t0, insere
+procura_fim:
+	mv t1, t0 
+	addi t1, t1, 4 		
+	lw t0, 4(t0)
+	bnez t0, procura_fim 
+insere:
+	li a7, 9 
+	li a0, 8 
+	ecall 
+	sw a0, 0(t1) 
+	sw a1, 0(a0) 
 	la a0, txt_inserido
 	ret
 
