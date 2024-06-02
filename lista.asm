@@ -18,6 +18,7 @@ funcoes:	.space 20
 
 		#inputs simples para o usuario
 txt_inserido:	.string "foi inserido\n"
+txt_qtd_ins:	.string " número(s) inserido(s)\n"
 txt_removido:	.string "foi removido\n"
 txt_input:	.string "\nDigite um número\n"
 n_implementado:	.string "\nEsta operação não foi implementada\n"
@@ -107,22 +108,27 @@ fim:
 #################################################################
 
 insere_inteiro:
-	lw t0, 0(a0) 
-	mv t1, a0 
-	beqz t0, insere
+	lw t0, 0(a0)		# Salva em t0 o valor do endereço de a0
+	mv t1, a0		# Move o valor para t1
+	beqz t0, insere		# Se t0 for 0, vai para insere
+	
 procura_fim:
-	mv t1, t0 
-	addi t1, t1, 4 		
-	lw t0, 4(t0)
-	bnez t0, procura_fim 
+	mv t1, t0		# Move o valor de t0 para t1
+	addi t1, t1, 4 		# Soma 4 em t1, para o deslocamento para a próxima posição de memória
+	lw t0, 4(t0)		# Passa para as próximas 4 posições de t0
+	bnez t0, procura_fim	# Enquanto t0 não for 0, volta para procura_fim
+	 
 insere:
 	li a7, 9 
 	li a0, 8 
-	ecall 
-	sw a0, 0(t1) 
-	sw a1, 0(a0) 
-	la a0, txt_inserido
-	ret
+	ecall 			# Chama OS
+	sw a0, 0(t1) 		# Salva em a0 o endereço em t1
+	sw a1, 0(a0) 		# Salva em a1 o valor em a0
+	la a0, txt_inserido	# Mensagem final
+	addi s3, s3, 1		# Contador de números inseridos
+	la t3, qtd_inserido	# Carrega qtd_inserido em t3
+	sw s3, 0(t3)		# Salva o valor de s3 em t3
+	ret			# retorna da função
 
 #################################################################
 # função: int remove_por_indice(int *head, int indice);  	#
@@ -167,5 +173,11 @@ imprime_lista:
 #################################################################
 
 estatistica:
+	lw a0, 0(t3)		# Chama o valor de t3
+	li a7, 1		# Operação para imprimir inteiro
+	ecall			# Chama OS
+	la a0, txt_qtd_ins	# Imprime mensagem de qtd números inseridos
+	li a7, 4
+	ecall
 	la a0, n_implementado
 	ret
