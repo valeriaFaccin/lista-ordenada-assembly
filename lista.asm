@@ -37,6 +37,8 @@ op6:		.asciz  "6 - Sair\n"
 main:
 	li s0, 0		# Inicia o registrador de controle das opções menores inválidas 
 	li s1, 6		# Inicia o registrador de controle das opções maiores inválidas 
+	li s2, 0		# Inicia o registrador de controle da quantidade de inserções
+	li s3, 0		# Inicia o registrador de controle da quantidade de remoções
 	la t0, funcoes		# Carrega o vetor de funções
 	la t1, insere_inteiro	# Endereço da função de inserir	
 	sw t1, 0(t0)		# Adiciona a função no vetor v[0]
@@ -125,9 +127,9 @@ insere:
 	sw a0, 0(t1) 		# Salva em a0 o endereço em t1
 	sw a1, 0(a0) 		# Salva em a1 o valor em a0
 	la a0, txt_inserido	# Mensagem final
-	addi s3, s3, 1		# Contador de números inseridos
+	addi s2, s2, 1		# Contador de números inseridos
 	la t3, qtd_inserido	# Carrega qtd_inserido em t3
-	sw s3, 0(t3)		# Salva o valor de s3 em t3
+	sw s2, 0(t3)		# Salva o valor de s3 em t3
 	ret			# retorna da função
 
 #################################################################
@@ -173,11 +175,5 @@ imprime_lista:
 #################################################################
 
 estatistica:
-	lw a0, 0(t3)		# Chama o valor de t3
-	li a7, 1		# Operação para imprimir inteiro
-	ecall			# Chama OS
-	la a0, txt_qtd_ins	# Imprime mensagem de qtd números inseridos
-	li a7, 4
-	ecall
 	la a0, n_implementado
 	ret
