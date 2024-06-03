@@ -9,15 +9,13 @@
 		.data
 		#estatisticas
 
-qtd_inserido:	.word 0
-qtd_removido:	.word 0
 head:		.word 0
 maior:		.space 4
 menor:		.space 4
 funcoes:	.space 20
 
 		#inputs simples para o usuario
-txt_inserido:	.string "foi inserido\n"
+txt_inserido:	.string "foi inserido no índice: \n"
 txt_qtd_ins:	.string " número(s) inserido(s)\n"
 txt_removido:	.string "foi removido\n"
 txt_input:	.string "\nDigite um número\n"
@@ -50,9 +48,10 @@ main:
 	sw t1, 12(t0)		# Adiciona a função no vetor v[3]
 	la t1, estatistica	
 	sw t1, 16(t0)		# Adiciona a função no vetor v[4]
-	li a7, 4 		# Comando para PrintString
+
 	
 loop_menu:
+	li a7, 4 		# Comando para PrintString
 	la a0, menu		# Carrega o menu para ser printado
 	ecall			# Chama o OS
 	li a7, 5		# Comando para ReadInt
@@ -73,7 +72,9 @@ loop_menu:
 
 invalido:
 	la a0 txt_invalido	# Salva a mensagem "inválida" para retorno
-	j volta_loop		# Vai para o label printar a mensagem e voltar para o loop
+	li a7, 4		# Comando para PrintString
+	ecall			# Chama OS
+	j loop_menu		# Volta para o loop
 	
 ins_rmv:
 	li a7, 4		# Comando para PrintString
@@ -89,11 +90,7 @@ load_head:
 chama_func:
 	lw t1, 0(t0)		# Carrega o função
 	jalr t1			# Chama a função
-	
-volta_loop:
-	li a7, 4		# Comando para PrintString
-	ecall			# Chama OS
-	j loop_menu		# Volta para o loop
+	j loop_menu
 
 fim:
 	li a0, 0		# Coloca 0 no retorno do programa
@@ -110,26 +107,31 @@ fim:
 #################################################################
 
 insere_inteiro:
+	mv t2, zero		# Indice, i = 0
 	lw t0, 0(a0)		# Salva em t0 o valor do endereço de a0
 	mv t1, a0		# Move o valor para t1
 	beqz t0, insere		# Se t0 for 0, vai para insere
 	
 procura_fim:
+	addi t2, t2, 1		# Incrementa o índice i ++
 	mv t1, t0		# Move o valor de t0 para t1
 	addi t1, t1, 4 		# Soma 4 em t1, para o deslocamento para a próxima posição de memória
 	lw t0, 4(t0)		# Passa para as próximas 4 posições de t0
 	bnez t0, procura_fim	# Enquanto t0 não for 0, volta para procura_fim
 	 
 insere:
-	li a7, 9 
-	li a0, 8 
-	ecall 			# Chama OS
+	li a7, 9 		# Codigo para alocar memória
+	li a0, 8 		# Aloca 8 bytes de memória
+	ecall 			
 	sw a0, 0(t1) 		# Salva em a0 o endereço em t1
 	sw a1, 0(a0) 		# Salva em a1 o valor em a0
 	la a0, txt_inserido	# Mensagem final
+	li a7, 4		# Chama a mensagem
+	ecall			
+	mv a0, t2		# Move o índice para o print e para o retorno da função
+	li a7, 1		# Codigo para printar int
+	ecall
 	addi s2, s2, 1		# Contador de números inseridos
-	la t3, qtd_inserido	# Carrega qtd_inserido em t3
-	sw s2, 0(t3)		# Salva o valor de s3 em t3
 	ret			# retorna da função
 
 #################################################################
@@ -143,6 +145,8 @@ insere:
 
 remove_por_indice:
 	la a0, txt_removido
+	li a7, 4		# Comando para PrintString
+	ecall			# Chama OS
 	ret
 	
 #################################################################
@@ -156,6 +160,8 @@ remove_por_indice:
 
 remove_por_valor:
 	la a0, n_implementado
+	li a7, 4		# Comando para PrintString
+	ecall			# Chama OS
 	ret
 	
 #################################################################
@@ -166,6 +172,8 @@ remove_por_valor:
 
 imprime_lista:
 	la a0, n_implementado
+	li a7, 4		# Comando para PrintString
+	ecall			# Chama OS
 	ret
 	
 #################################################################
@@ -176,4 +184,6 @@ imprime_lista:
 
 estatistica:
 	la a0, n_implementado
+	li a7, 4		# Comando para PrintString
+	ecall			# Chama OS
 	ret
