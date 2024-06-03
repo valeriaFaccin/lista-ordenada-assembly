@@ -15,7 +15,7 @@ menor:		.space 4
 funcoes:	.space 20
 
 		#inputs simples para o usuario
-txt_inserido:	.string "foi inserido no índice: \n"
+txt_inserido:	.string "foi inserido no índice: "
 txt_qtd_ins:	.string " número(s) inserido(s)\n"
 txt_removido:	.string "foi removido\n"
 txt_input:	.string "\nDigite um número\n"
@@ -23,7 +23,7 @@ n_implementado:	.string "\nEsta operação não foi implementada\n"
 txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
 
 		#print do menu
-menu:		.ascii "*** MENU ***\n\n"
+menu:		.ascii "\n*** MENU ***\n\n"
 op1:		.ascii "1 - Inserir\n"
 op2:		.ascii "2 - Remover por indice\n"
 op3:		.ascii "3 - Remover por valor\n"
@@ -114,15 +114,15 @@ insere_inteiro:
 	
 procura_fim:
 	addi t2, t2, 1		# Incrementa o índice i ++
-	mv t1, t0		# Move o valor de t0 para t1
-	addi t1, t1, 4 		# Soma 4 em t1, para o deslocamento para a próxima posição de memória
+	addi t1, t0, 4 		# ponteiro para o proximo
 	lw t0, 4(t0)		# Passa para as próximas 4 posições de t0
 	bnez t0, procura_fim	# Enquanto t0 não for 0, volta para procura_fim
 	 
 insere:
 	li a7, 9 		# Codigo para alocar memória
 	li a0, 8 		# Aloca 8 bytes de memória
-	ecall 			
+	ecall 		
+	sw zero, 4(a0)		# inicia como null
 	sw a0, 0(t1) 		# Salva em a0 o endereço em t1
 	sw a1, 0(a0) 		# Salva em a1 o valor em a0
 	la a0, txt_inserido	# Mensagem final
