@@ -12,7 +12,6 @@
 head:		.word 0
 maior:		.space 4
 menor:		.space 4
-funcoes:	.space 20
 
 		#inputs simples para o usuario
 txt_inserido:	.string "foi inserido no índice: "
@@ -33,22 +32,8 @@ op6:		.asciz  "6 - Sair\n"
 
 		.text
 main:
-	li s0, 0		# Inicia o registrador de controle das opções menores inválidas 
-	li s1, 6		# Inicia o registrador de controle das opções maiores inválidas 
 	li s2, 0		# Inicia o registrador de controle da quantidade de inserções
 	li s3, 0		# Inicia o registrador de controle da quantidade de remoções
-	la t0, funcoes		# Carrega o vetor de funções
-	la t1, insere_inteiro	# Endereço da função de inserir	
-	sw t1, 0(t0)		# Adiciona a função no vetor v[0]
-	la t1, remove_por_indice 
-	sw t1, 4(t0)		# Adiciona a função no vetor v[1]
-	la t1, remove_por_valor # Endereço da função de remover por valor	
-	sw t1, 8(t0) 		# Adiciona a função no vetor v[2]
-	la t1, imprime_lista	
-	sw t1, 12(t0)		# Adiciona a função no vetor v[3]
-	la t1, estatistica	
-	sw t1, 16(t0)		# Adiciona a função no vetor v[4]
-
 	
 loop_menu:
 	li a7, 4 		# Comando para PrintString
@@ -56,42 +41,55 @@ loop_menu:
 	ecall			# Chama o OS
 	li a7, 5		# Comando para ReadInt
 	ecall			# Chama o OS
-	beq a0, s1, fim		# Se opção = 6 encerra 
-	blt s1, a0, invalido	# Se opção > 6 é inválida 
-	bge s0, a0, invalido	# Se 0 >= opção é inválida
-	mv t2, a0		# Coloca opções em uma var temporaria para calculo de indice
-	addi t2, t2, -1		# Tira um para trabalhar com 0 até 4
-	la t0, funcoes		# Carrega o vetor de funções temporiamente
-	slli t2, t2, 2		# Multiplica o indice por 4
-	add t0, t0, t2		# Faz o deslocamento v[i]
-	li t1, 3		# Carrega 3 para comparar as opções inserir e remover
-	ble a0, t1, ins_rmv	# Se opções <= 3 a função recebe a1 e a0
-	li t1, 4		# Carrega 4 para comparar função estatística
-	beq a0, t1, load_head	# Se opções = 4 a função recebe a0
-	j chama_func		# se opções = 5 a função não recebe parâmetro 
+	li t0, 6
+	beq t0, a0, fim		# Se opção = 6 encerra 
+	li t0, 1		# Insere inteiro
+	beq t0, a0, trata_insere 
+	li t0, 2		# Remover por índece
+	beq t0, a0, trata_removeI
+	li t0, 3		# Remover por valor
+	beq t0, a0, trata_removeV
+	li t0, 4		# Imprimir lista
+	beq t0, a0, trata_print
+	li t0, 5		# Estatísticas
+	beq t0, a0, trata_estatistica
 
 invalido:
 	la a0 txt_invalido	# Salva a mensagem "inválida" para retorno
 	li a7, 4		# Comando para PrintString
 	ecall			# Chama OS
 	j loop_menu		# Volta para o loop
-	
-ins_rmv:
-	li a7, 4		# Comando para PrintString
-	la a0, txt_input	# Coloca a mensagem de input para ser exibida
-	ecall			# Chama OS para exibir
-	li a7, 5		# Comando para ReadInt
-	ecall			# Chama OS
-	mv a1, a0		# Move o valor para a1
-	
-load_head:
-	la a0, head		# Carrega o head em a0
-	
-chama_func:
-	lw t1, 0(t0)		# Carrega o função
-	jalr t1			# Chama a função
-	j loop_menu
 
+trata_insere:
+	jal input_a1a0
+	jal insere_inteiro
+	mv t0, a0
+	li a7, 4		# Chama a mensagem
+	la a0, txt_inserido	# Mensagem final
+	ecall
+	li a7, 1
+	mv a0, t0
+	j loop_menu		# Volta para o loop
+	
+trata_removeI:
+	jal input_a1a0
+	jal remove_por_indice
+	j loop_menu		# Volta para o loop
+	
+trata_removeV:
+	jal input_a1a0
+	jal remove_por_valor
+	j loop_menu		# Volta para o loop
+	
+trata_print:
+	jal input_a0
+	jal imprime_lista
+	j loop_menu		# Volta para o loop
+	
+trata_estatistica:
+	jal estatistica
+	j loop_menu		# Volta para o loop
+	
 fim:
 	li a0, 0		# Coloca 0 no retorno do programa
 	li a7, 93		# Comando para encerrar programa
@@ -125,12 +123,8 @@ insere:
 	sw zero, 4(a0)		# inicia como null
 	sw a0, 0(t1) 		# Salva em a0 o endereço em t1
 	sw a1, 0(a0) 		# Salva em a1 o valor em a0
-	la a0, txt_inserido	# Mensagem final
-	li a7, 4		# Chama a mensagem
-	ecall			
+			
 	mv a0, t2		# Move o índice para o print e para o retorno da função
-	li a7, 1		# Codigo para printar int
-	ecall
 	addi s2, s2, 1		# Contador de números inseridos
 	ret			# retorna da função
 
@@ -186,4 +180,23 @@ estatistica:
 	la a0, n_implementado
 	li a7, 4		# Comando para PrintString
 	ecall			# Chama OS
+	ret
+	
+#################################################################
+# função: retorna parâmetros					#
+#   Retorna os parâmetros para as funções principais		#
+#   1 função - Carrega um int em a1,				#
+#   2 função - Carrega o ponteiro head em a0			#
+#################################################################
+	
+input_a1a0:
+	li a7, 4		# Comando para PrintString
+	la a0, txt_input	# Coloca a mensagem de input para ser exibida
+	ecall			# Chama OS para exibir
+	li a7, 5		# Comando para ReadInt
+	ecall			# Chama OS
+	mv a1, a0		# Move o valor para a1
+	
+input_a0:
+	la a0, head		# Carrega o head em a0
 	ret
