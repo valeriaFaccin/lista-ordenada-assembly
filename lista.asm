@@ -69,6 +69,7 @@ trata_insere:
 	ecall
 	li a7, 1
 	mv a0, t0
+	ecall
 	j loop_menu		# Volta para o loop
 	
 trata_removeI:
@@ -109,21 +110,26 @@ insere_inteiro:
 	lw t0, 0(a0)		# Salva em t0 o valor do endereço de a0
 	mv t1, a0		# Move o valor para t1
 	beqz t0, insere		# Se t0 for 0, vai para insere
+	lw t3, (t0)
+	bge t3, a1, insere
 	
 procura_fim:
 	addi t2, t2, 1		# Incrementa o índice i ++
-	addi t1, t0, 4 		# ponteiro para o proximo
-	lw t0, 4(t0)		# Passa para as próximas 4 posições de t0
-	bnez t0, procura_fim	# Enquanto t0 não for 0, volta para procura_fim
+	addi t1, t0, 4 		# ponteiro para o proximo t1 = temp->next
+	lw t0, 4(t0)		# Passa para a proxima posição t0 = temp->next->next
+	
+	beqz t0, insere		# Ou até achar o fim
+	lw t3, (t0)		# Pega o valor do proximo elemento t3
+	bge a1, t3, procura_fim # Vai procurar até achar alguém maior 
 	 
 insere:
 	li a7, 9 		# Codigo para alocar memória
 	li a0, 8 		# Aloca 8 bytes de memória
 	ecall 		
-	sw zero, 4(a0)		# inicia como null
-	sw a0, 0(t1) 		# Salva em a0 o endereço em t1
-	sw a1, 0(a0) 		# Salva em a1 o valor em a0
-			
+	sw t0, 4(a0)		# novo->next = temp->next
+	sw a1, 0(a0) 		# Salva o valor no novo nó
+	sw a0, 0(t1) 		# temp->next = novo
+	
 	mv a0, t2		# Move o índice para o print e para o retorno da função
 	addi s2, s2, 1		# Contador de números inseridos
 	ret			# retorna da função
