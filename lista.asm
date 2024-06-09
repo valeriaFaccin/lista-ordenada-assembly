@@ -7,10 +7,7 @@
 #########################################################################
 
 		.data
-		#estatisticas
 head:		.word 0
-maior:		.space 4
-menor:		.space 4
 
 		#inputs simples para o usuario
 txt_inserido:	.string "foi inserido no índice: "
@@ -223,25 +220,22 @@ estatistica:
 	lw t0, 0(a0)		# Salva em t0 o endereço de a0 (head)
 	beqz t0, vazio		# Vai para vazio se t0 = 0, ou seja, lista vazia
 	lw t0, 0(t0)		# Salva em t0 o valor de t0
-	la t1, menor		# Salva em t1 o endereço de menor	
-	sw t0, 0(t1)		# Define menor com o primeiro valor da lista          	
 	
-imprime_estatistica:
 	la a0, txt_menor
-	li a7, 4		
+	li a7, 4		# Comando para PrintString
 	ecall
-	la a0, menor		# Salva endereço de manor em a0
-	lw a0, 0(a0)		# Salva em a0 o valor presente em a0
-	li a7, 1		
-	ecall
+	mv a0, t0		# Salva o valor de t0 (primeiro elemento da lista) em a0
+	li a7, 1		# Comando para PrintInteger
+	ecall   
 	
 	la a0, txt_maior
-	li a7, 4		
+	li a7, 4		# Comando para PrintString
 	ecall
 	mv a0, s0		# Salva o valor de maior em a0
-	li a7, 1		
-	ecall
-
+	li a7, 1		# Comando para PrintInteger
+	ecall      	
+	
+imprime_estatistica:
 	la a0, qtd_total
 	li a7, 4		# Comando para PrintString
 	ecall
@@ -266,10 +260,21 @@ imprime_estatistica:
 	ret	
 
 vazio:
-	la t1, menor
-   	li t0, 0
- 	sw t0, 0(t1)          # Define menor como 0
-	j imprime_estatistica			
+	la a0, txt_menor
+	li a7, 4		# Comando para PrintString
+	ecall
+	la a0, sem_elementos
+	li a7, 4		# Comando para PrintString
+	ecall
+	
+	la a0, txt_maior
+	li a7, 4		# Comando para PrintString
+	ecall
+	la a0, sem_elementos
+	li a7, 4		# Comando para PrintString
+	ecall
+	
+	j imprime_estatistica	# Volta para imprime_estatistica		
 	
 #################################################################
 # função: retorna parâmetros					#
