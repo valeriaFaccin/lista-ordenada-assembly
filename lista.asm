@@ -8,7 +8,6 @@
 
 		.data
 		#estatisticas
-
 head:		.word 0
 maior:		.space 4
 menor:		.space 4
@@ -19,6 +18,7 @@ txt_qtd_ins:	.string " número(s) inserido(s)\n"
 txt_removido:	.string "foi removido\n"
 txt_input:	.string "\nDigite um número\n"
 n_implementado:	.string "\nEsta operação não foi implementada\n"
+sem_elementos:	.string	"\nNão há elementos na lista\n"
 txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
 
 		#print do menu
@@ -55,7 +55,7 @@ loop_menu:
 	beq t0, a0, trata_estatistica
 
 invalido:
-	la a0 txt_invalido	# Salva a mensagem "inválida" para retorno
+	la a0,txt_invalido	# Salva a mensagem "inválida" para retorno
 	li a7, 4		# Comando para PrintString
 	ecall			# Chama OS
 	j loop_menu		# Volta para o loop
@@ -171,11 +171,28 @@ remove_por_valor:
 #################################################################
 
 imprime_lista:
-	la a0, n_implementado
-	li a7, 4		# Comando para PrintString
-	ecall			# Chama OS
-	ret
-	
+	lw t0, 0(a0)			# Salva em t0 o endereço de a0 (head)
+	beqz t0, nenhum_elemento	# Vai para label e t0 = 0
+
+imprimir:
+    mv t1, t0				# Salva em t1 o endereço salvo em t0
+    lw a0, 0(t1)			# Salva em a0 o valor em t1
+    li a7, 1             		# Comando para PrintInteger
+    ecall				# Chama OS
+
+    lw t0, 4(t1)          		# Salva em t0 o proximo endereço da lista
+    beqz t0, fim_imprimir     		# Vai para fim_imprimir se t0 = 0, ou seja, estar no fim da lista
+    j imprimir				# Volta para imprimir
+
+fim_imprimir:
+    ret
+
+nenhum_elemento:
+    la a0, sem_elementos  
+    li a7, 4              		# Comando para PrintString
+    ecall				# Chama OS
+    ret
+
 #################################################################
 # função: void estatistica()					#
 #   Exibe as estatísticas, maior número, menor número,		#
