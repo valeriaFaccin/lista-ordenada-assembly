@@ -19,7 +19,7 @@ txt_input:	.string "\nDigite um número\n"
 txt_imprimir:	.string	"\nElementos da Lista\n"
 n_implementado:	.string "\nEsta operação não foi implementada\n"
 sem_elementos:	.string	"\nNão há elementos na lista\n"
-espaco:		.string " - "
+separador:	.string " | "
 txt_maior: 	.string "\nMaior elemento da Lista: "
 txt_menor:	.string "\nMenor elemento da Lista: "
 txt_qtd_ins:	.string "\nNúmero(s) inserido(s): "
@@ -179,6 +179,12 @@ remove_por_valor:
 #################################################################
 
 imprime_lista:
+	mv t2, a0			# Salva o valor de a0 (head) em t2	
+	la a0, txt_imprimir  
+        li a7, 4              		# Comando para PrintString
+        ecall				# Chama OS
+	
+	mv a0, t2			# Salva em a0 o valor de t2
 	lw t0, 0(a0)			# Salva em t0 o endereço de a0 (head)
 	beqz t0, nenhum_elemento	# Vai para label e t0 = 0
 
@@ -191,7 +197,7 @@ imprimir:
         lw t0, 4(t1)          		# Salva em t0 o proximo endereço da lista
         beqz t0, fim_imprimir     	# Vai para fim_imprimir se t0 = 0, ou seja, estar no fim da lista
     
-        la a0, espaco  
+        la a0, separador  
         li a7, 4              		# Comando para PrintString
         ecall				# Chama OS
     
