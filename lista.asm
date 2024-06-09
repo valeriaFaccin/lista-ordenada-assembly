@@ -14,13 +14,17 @@ menor:		.space 4
 
 		#inputs simples para o usuario
 txt_inserido:	.string "foi inserido no índice: "
-txt_qtd_ins:	.string " número(s) inserido(s)\n"
 txt_removido:	.string "foi removido\n"
 txt_input:	.string "\nDigite um número\n"
 txt_imprimir:	.string	"\nElementos da Lista\n"
 n_implementado:	.string "\nEsta operação não foi implementada\n"
 sem_elementos:	.string	"\nNão há elementos na lista\n"
 espaco:		.string " - "
+txt_maior: 	.string "\nMaior elemento da Lista: "
+txt_menor:	.string "\nMenor elemento da Lista: "
+txt_qtd_ins:	.string "\nNúmero(s) inserido(s): "
+txt_qtd_remv:	.string "\nNúmero(s) removido(s): "
+qtd_total:	.string "\nQuantidade de elementos na Lista: "
 txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
 
 		#print do menu
@@ -34,6 +38,7 @@ op6:		.asciz  "6 - Sair\n"
 
 		.text
 main:
+	li s0, 0		# Inicia o registrador de controle do maior número
 	li s2, 0		# Inicia o registrador de controle da quantidade de inserções
 	li s3, 0		# Inicia o registrador de controle da quantidade de remoções
 	
@@ -90,6 +95,7 @@ trata_print:
 	j loop_menu		# Volta para o loop
 	
 trata_estatistica:
+	jal input_a0
 	jal estatistica
 	j loop_menu		# Volta para o loop
 	
@@ -189,28 +195,75 @@ imprimir:
         li a7, 4              		# Comando para PrintString
         ecall				# Chama OS
     
-       j imprimir			# Volta para imprimir
+        j imprimir			# Volta para imprimir
 
 fim_imprimir:
-       ret
+        ret
 
 nenhum_elemento:
-       la a0, sem_elementos  
-       li a7, 4              		# Comando para PrintString
-       ecall				# Chama OS
-       ret
+        la a0, sem_elementos  
+        li a7, 4              		# Comando para PrintString
+        ecall				# Chama OS
+        ret
 
 #################################################################
-# função: void estatistica()					#
+# função: void estatistica(int *head)				#
 #   Exibe as estatísticas, maior número, menor número,		#
 #   quantidade de elementos, quantidade inserida e removida	#
+# entrada: a0 - ponteiro head					#
 #################################################################
 
 estatistica:
-	la a0, n_implementado
+	lw t0, 0(a0)		# Salva em t0 o endereço de a0 (head)
+	beqz t0, vazio		# Vai para vazio se t0 = 0, ou seja, lista vazia
+	lw t0, 0(t0)		# Salva em t0 o valor de t0
+	la t1, menor		# Salva em t1 o endereço de menor	
+	sw t0, 0(t1)		# Define menor com o primeiro valor da lista          	
+	
+imprime_estatistica:
+	la a0, txt_menor
+	li a7, 4		
+	ecall
+	la a0, menor		# Salva endereço de manor em a0
+	lw a0, 0(a0)		# Salva em a0 o valor presente em a0
+	li a7, 1		
+	ecall
+	
+	la a0, txt_maior
+	li a7, 4		
+	ecall
+	mv a0, s0		# Salva o valor de maior em a0
+	li a7, 1		
+	ecall
+
+	la a0, qtd_total
 	li a7, 4		# Comando para PrintString
-	ecall			# Chama OS
-	ret
+	ecall
+	sub t0, s2, s3
+	mv a0, t0		# Salva em a0 o valor de t0
+	li a7, 1		# Comando para PrintInteger
+	ecall
+	
+	la a0, txt_qtd_ins
+	li a7, 4		# Comando para PrintString
+	ecall
+	mv a0, s2		# Salva em a0 o valor de s2
+	li a7, 1		# Comando para PrintInteger
+	ecall
+	
+	la a0, txt_qtd_remv
+	li a7, 4		# Comando para PrintString
+	ecall
+	mv a0, s3		# Salva em a0 o valor de s3
+	li a7, 1		# Comando para PrintInteger
+	ecall	
+	ret	
+
+vazio:
+	la t1, menor
+   	li t0, 0
+ 	sw t0, 0(t1)          # Define menor como 0
+	j imprime_estatistica			
 	
 #################################################################
 # função: retorna parâmetros					#
