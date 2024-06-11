@@ -184,17 +184,15 @@ imprime_lista:
         li a7, 4              		# Comando para PrintString
         ecall				# Chama OS
 	
-	mv a0, t2			# Salva em a0 o valor de t2
-	lw t0, 0(a0)			# Salva em t0 o endereço de a0 (head)
+	lw t0, 0(t2)			# Salva em a0 o valor de t2
 	beqz t0, nenhum_elemento	# Vai para label e t0 = 0
 
 imprimir:
-        mv t1, t0			# Salva em t1 o endereço salvo em t0
-        lw a0, 0(t1)			# Salva em a0 o valor em t1
+        lw a0, 0(t0)			# Salva em a0 o valor em t1
         li a7, 1             		# Comando para PrintInteger
         ecall				# Chama OS
 
-        lw t0, 4(t1)          		# Salva em t0 o proximo endereço da lista
+        lw t0, 4(t0)          		# Salva em t0 o proximo endereço da lista
         beqz t0, fim_imprimir     	# Vai para fim_imprimir se t0 = 0, ou seja, estar no fim da lista
     
         la a0, separador  
@@ -203,20 +201,18 @@ imprimir:
     
         j imprimir			# Volta para imprimir
 
-fim_imprimir:
-        ret
-
 nenhum_elemento:
         la a0, sem_elementos  
         li a7, 4              		# Comando para PrintString
         ecall				# Chama OS
+
+fim_imprimir:
         ret
 
 #################################################################
-# função: void estatistica(int *head)				#
+# função: void estatistica()					#
 #   Exibe as estatísticas, maior número, menor número,		#
-#   quantidade de elementos, quantidade inserida e removida	#
-# entrada: a0 - ponteiro head					#
+#   quantidade de elementos, quantidade inserida e removida	#				#
 #################################################################
 
 estatistica:
