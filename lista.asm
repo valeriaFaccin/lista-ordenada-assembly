@@ -114,7 +114,7 @@ insere_inteiro:
 	mv t2, zero		# Indice, i = 0
 	lw t0, 0(a0)		# Salva em t0 o valor do endereço de a0
 	mv t1, a0		# Move o valor para t1
-	beqz t0, insere		# Se t0 for 0, vai para insere
+	beqz t0, att_maior	# Se t0 for 0, vai para insere
 	lw t3, (t0)
 	bge t3, a1, insere
 	
@@ -123,10 +123,13 @@ procura_fim:
 	addi t1, t0, 4 		# ponteiro para o proximo t1 = temp->next
 	lw t0, 4(t0)		# Passa para a proxima posição t0 = temp->next->next
 	
-	beqz t0, insere		# Ou até achar o fim
+	beqz t0, att_maior	# Ou até achar o fim
 	lw t3, (t0)		# Pega o valor do proximo elemento t3
 	bge a1, t3, procura_fim # Vai procurar até achar alguém maior 
-	 
+
+att_maior:
+	mv s0, a1
+	
 insere:
 	li a7, 9 		# Codigo para alocar memória
 	li a0, 8 		# Aloca 8 bytes de memória
