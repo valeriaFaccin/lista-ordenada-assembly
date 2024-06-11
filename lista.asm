@@ -21,6 +21,7 @@ txt_maior: 	.string "\nMaior elemento da Lista: "
 txt_menor:	.string "\nMenor elemento da Lista: "
 txt_qtd_ins:	.string "\nNúmero(s) inserido(s): "
 txt_qtd_remv:	.string "\nNúmero(s) removido(s): "
+txt_list_vazia:	.string	"\nLista Vazia!"
 qtd_total:	.string "\nQuantidade de elementos na Lista: "
 txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
 
@@ -92,7 +93,6 @@ trata_print:
 	j loop_menu		# Volta para o loop
 	
 trata_estatistica:
-	jal input_a0
 	jal estatistica
 	j loop_menu		# Volta para o loop
 	
@@ -212,10 +212,11 @@ fim_imprimir:
 #################################################################
 # função: void estatistica()					#
 #   Exibe as estatísticas, maior número, menor número,		#
-#   quantidade de elementos, quantidade inserida e removida	#				#
+#   quantidade de elementos, quantidade inserida e removida	#				
 #################################################################
 
 estatistica:
+	la a0, head
 	lw t0, 0(a0)		# Salva em t0 o endereço de a0 (head)
 	beqz t0, vazio		# Vai para vazio se t0 = 0, ou seja, lista vazia
 	lw t0, 0(t0)		# Salva em t0 o valor de t0
@@ -262,14 +263,14 @@ vazio:
 	la a0, txt_menor
 	li a7, 4		# Comando para PrintString
 	ecall
-	la a0, sem_elementos
+	la a0, txt_list_vazia
 	li a7, 4		# Comando para PrintString
 	ecall
 	
 	la a0, txt_maior
 	li a7, 4		# Comando para PrintString
 	ecall
-	la a0, sem_elementos
+	la a0, txt_list_vazia
 	li a7, 4		# Comando para PrintString
 	ecall
 	
