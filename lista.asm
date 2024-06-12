@@ -80,7 +80,7 @@ trata_insere:
 	j loop_menu		# Volta para o loop
 	
 erro_ins:
-	la a0, txt_erro_In
+	la a0, txt_erro_in
 	ecall
 	j loop_menu		# Volta para o loop
 	
