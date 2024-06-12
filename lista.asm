@@ -24,6 +24,7 @@ txt_qtd_remv:	.string "\nNúmero(s) removido(s): "
 txt_list_vazia:	.string	"\nLista Vazia!"
 qtd_total:	.string "\nQuantidade de elementos na Lista: "
 txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
+txt_erro_in:	.string "Não foi posssível inserir na lista"
 
 		#print do menu
 menu:		.ascii "\n*** MENU ***\n\n"
@@ -32,7 +33,7 @@ op2:		.ascii "2 - Remover por indice\n"
 op3:		.ascii "3 - Remover por valor\n"
 op4:		.ascii "4 - Imprimir lista\n"
 op5:		.ascii "5 - Estatísticas\n"
-op6:		.asciz  "6 - Sair\n"
+op6:		.asciz "6 - Sair\n"
 
 		.text
 main:
@@ -68,12 +69,18 @@ invalido:
 trata_insere:
 	jal input_a1a0
 	jal insere_inteiro
-	mv t0, a0
 	li a7, 4		# Chama a mensagem
+	bltz a0, erro_ins
+	mv t0, a0
 	la a0, txt_inserido	# Mensagem final
 	ecall
 	li a7, 1
 	mv a0, t0
+	ecall
+	j loop_menu		# Volta para o loop
+	
+erro_ins:
+	la a0, txt_erro_In
 	ecall
 	j loop_menu		# Volta para o loop
 	
@@ -88,7 +95,7 @@ trata_removeV:
 	j loop_menu		# Volta para o loop
 	
 trata_print:
-	jal input_a0
+	la a0, head
 	jal imprime_lista
 	j loop_menu		# Volta para o loop
 	
@@ -133,15 +140,19 @@ att_maior:
 insere:
 	li a7, 9 		# Codigo para alocar memória
 	li a0, 8 		# Aloca 8 bytes de memória
-	ecall 		
+	ecall 	
+	li t3, -1 		# se skrb retornar -1 não dá para alocar mémoria
+	beq t0, t3, erro_insere	 
 	sw t0, 4(a0)		# novo->next = temp->next
 	sw a1, 0(a0) 		# Salva o valor no novo nó
 	sw a0, 0(t1) 		# temp->next = novo
-	
-	mv a0, t2		# Move o índice para o print e para o retorno da função
 	addi s2, s2, 1		# Contador de números inseridos
+	mv a0, t2		# Move o índice para o print e para o retorno da função
 	ret			# retorna da função
-
+	
+erro_insere:
+	li a0, -1		#indice -1 se for erro
+	ret	
 #################################################################
 # função: int remove_por_indice(int *head, int indice);  	#
 #   remove um elemento da lista pelo indice			#
@@ -290,7 +301,5 @@ input_a1a0:
 	li a7, 5		# Comando para ReadInt
 	ecall			# Chama OS
 	mv a1, a0		# Move o valor para a1
-	
-input_a0:
 	la a0, head		# Carrega o head em a0
 	ret
