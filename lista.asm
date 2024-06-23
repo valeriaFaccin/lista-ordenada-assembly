@@ -184,8 +184,8 @@ erro:
         ret
 
 remover_indice:
-	lw t1, 4(t0)	# removido = prev->next
-	sw a1, 0(t0	# a1 = removido->valor
+	lw t0, 4(t1)	# removido = prev->next
+	sw a1, 0(t0)	# a1 = removido->valor
 	mv t2, ra	# salva o retorno
 	jal remove_item			# chama a função geral de remoção
 	jr t2
@@ -200,38 +200,41 @@ remover_indice:
 #################################################################
 
 remove_por_valor:
-	mv t0, a0			# Salva em t0 o valor de a0, temp = head
-	mv t1, t0			# Salva em t1 o valor de t0, prev = temp
-	lw t0, 0(t0)			# Salva em t0 o valor em t0
-	beqz t0, lista_vazia		# Verifica se a lista está vazia
+	#mv t0, a0			# Salva em t0 o valor de a0, temp = head
+	#mv t1, a0			# Salva em t1 o valor de t0, prev = temp
+	addi t0, a0, -4
+	li t3, 0
+	#lw t0, 0(t0)			# Salva em t0 o valor em t0
+	#beqz t0, lista_vazia		# Verifica se a lista está vazia
 	
-	lw t2, (t0)			# Salva em t2 o valor de t1
-	beq t1, a1, remover_valor	# Verifica se o valor em t2 é igual ao valor do elemento a ser removido
+	#lw t2, (t0)			# Salva em t2 o valor de t1
+	#beq t1, a1, remover_valor	# Verifica se o valor em t2 é igual ao valor do elemento a ser removido
 
 procura_valor:
 	mv t1, t0			# prev = temp
 	lw t0, 4(t0)			# temp = temp->next
-	beqz t0, att_maior_Rmv_valor	# Não encontrou o valor
-	
+	beqz t0, nao_encontrou		# Não encontrou o valor
 	lw t2, 0(t0)			# temp = temp->valor
 	beq t2, a1, remover_valor	# temp->valor == valor
-	j procura_valor
+	addi t3, t3, 1			# i++
+	bge a1, t2, procura_valor	# temp->valor < valor
 
-att_maior_Rmv_valor:
-	lw s0, 0(t1)			# atualiza o valor do maior elemento no registrador s0
-	j fim_remv_por_valor
+#att_maior_Rmv_valor:
+#	lw s0, 0(t1)			# atualiza o valor do maior elemento no registrador s0
+#	j fim_remv_por_valor
 
-lista_vazia:
-        la a0, sem_elementos  
-        li a7, 4              		# Comando para PrintString
-        ecall				# Chama OS
-        j fim_remv_por_valor
+nao_encontrou:
+        li a0, -1
+        li a1, -1
+        ret
 
 remover_valor:
+	mv t2, ra	#salva o endereco
 	jal remove_item			# chama a função geral de remoção
-
-fim_remv_por_valor:
-	ret
+	mv a1, t3
+	jr t2
+#fim_remv_por_valor:
+#	ret
 	
 #################################################################
 # função: void imprime_lista(int *head)				#
@@ -338,10 +341,10 @@ vazio:
 	j imprime_estatistica	# Volta para imprime_estatistica		
 	
 #################################################################
-# função: retorna parâmetros									#
-#   Retorna os parâmetros para as funções principais			#
-#   1 função - Carrega um int em a1,							#
-#   2 função - Carrega o ponteiro head em a0					#
+# função: retorna parâmetros					#
+#   Retorna os parâmetros para as funções principais		#
+#   1 função - Carrega um int em a1,				#
+#   2 função - Carrega o ponteiro head em a0			#
 #################################################################
 	
 input_a1a0:
@@ -363,8 +366,9 @@ remove_item:
 	lw t0, 4(t0)       	# temp = removido->next
   	sw t0, 4(t1)           	# prev->next = removido->next
   	addi s3, s3, 1  	# incrementa o registrador do número de remoções              
-	li a0, 1		# retorno de sucesso
+	
 	bnez t0, fim_remv	# if(removido-> next != null) return 1
 	lw s0, 0(t1)		# else atualizaMaior()
 fim_remv:
+	li a0, 1		# retorno de sucesso
 	ret
