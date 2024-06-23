@@ -12,17 +12,17 @@ head:		.word 0
 		#inputs simples para o usuario
 txt_inserido:	.string "foi inserido no índice: "
 txt_removido:	.string "foi removido\n"
-txt_input:	.string "\nDigite um número\n"
+txt_input:		.string "\nDigite um número\n"
 txt_imprimir:	.string	"\nElementos da Lista\n"
 n_implementado:	.string "\nEsta operação não foi implementada\n"
 sem_elementos:	.string	"\nNão há elementos na lista\n"
-separador:	.string " | "
-txt_maior: 	.string "\nMaior elemento da Lista: "
-txt_menor:	.string "\nMenor elemento da Lista: "
+separador:		.string " | "
+txt_maior: 		.string "\nMaior elemento da Lista: "
+txt_menor:		.string "\nMenor elemento da Lista: "
 txt_qtd_ins:	.string "\nNúmero(s) inserido(s): "
 txt_qtd_remv:	.string "\nNúmero(s) removido(s): "
 txt_list_vazia:	.string	"\nLista Vazia!"
-qtd_total:	.string "\nQuantidade de elementos na Lista: "
+qtd_total:		.string "\nQuantidade de elementos na Lista: "
 txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
 txt_erro_in:	.string "Não foi posssível inserir na lista"
 txt_erro_remv:	.string	"Não foi possível remover na lista\n"
@@ -164,38 +164,31 @@ erro_insere:
 #################################################################
 
 remove_por_indice:
-	mv t0, a0			# Salva em t0 o valor de a0, temp = head
-	mv t1, t0			# Salva em t1 o valor de t0, prev = temp
-	lw t0, 0(t0)			# Salva em t0 o valor em t0
-	beqz t0, vazia			# Verifica se a lista está vazia
+	#mv t0, a0			# Salva em t0 o valor de a0, temp = head
+	bltz a1, erro			# Se a1 < 0, indice menor que a lista
+	sub t0, s2, s3			# Quantidade de elementos na lista
+	bge a1, t0, erro		# Se a1 >= n, indice maior que a lista
 	
+	addi t1, a0, -4
 	addi t3, zero, 0		# inicia o contador de índices
-	beq t3, a1, remover_indice	# verifica se o índice atual corresponde ao índice do elemento a ser removido
-
-procura_indice:
-	mv t1, t0			# prev = temp
-	lw t0, 4(t0)			# temp = temp->next
-	addi t3, t3, 1			# incrementa o contador do índice
-	beqz t0, att_maior_Rmv_indice	# Não encontrou o valor
 	
-	beq t3, a1, remover_indice	# temp->valor == valor
+procura_indice:
+	beq t3, a1, remover_indice	# i == valor
+	lw t1, 4(t1)			# prev = prev->next
+	addi t3, t3, 1			# incrementa o contador do índice
 	j procura_indice		# retorna para procura_indice, para nova iteração na lista
 
-att_maior_Rmv_indice:
-	lw s0, 0(t1)			# atualiza o valor do maior elemento no registrador s0
-	j fim_remv_por_indice
-
-vazia:
-        la a0, sem_elementos  
-        li a7, 4              		# Comando para PrintString
-        ecall				# Chama OS
-        j fim_remv_por_indice
+erro:
+        li a0, -1
+        li a1, -1
+        ret
 
 remover_indice:
+	lw t1, 4(t0)	# removido = prev->next
+	sw a1, 0(t0	# a1 = removido->valor
+	mv t2, ra	# salva o retorno
 	jal remove_item			# chama a função geral de remoção
-
-fim_remv_por_indice:
-	ret
+	jr t2
 	
 #################################################################
 # função: int remove_por_valor(int *head, int valor)		#
@@ -345,10 +338,10 @@ vazio:
 	j imprime_estatistica	# Volta para imprime_estatistica		
 	
 #################################################################
-# função: retorna parâmetros					#
-#   Retorna os parâmetros para as funções principais		#
-#   1 função - Carrega um int em a1,				#
-#   2 função - Carrega o ponteiro head em a0			#
+# função: retorna parâmetros									#
+#   Retorna os parâmetros para as funções principais			#
+#   1 função - Carrega um int em a1,							#
+#   2 função - Carrega o ponteiro head em a0					#
 #################################################################
 	
 input_a1a0:
@@ -367,14 +360,11 @@ input_a1a0:
 ################################################################# 
 
 remove_item:
-	lw t0, 4(t0)            	# temp = temp->next
-  	sw t0, 4(t1)            	# prev->next = temp->next
-  	addi s3, s3, 1  		# incrementa o registrador do número de remoções
-	                    
-	la a0, txt_removido 
-        li a7, 4              		# Comando para PrintString
-        ecall				# Chama OS
-        
+	lw t0, 4(t0)       	# temp = removido->next
+  	sw t0, 4(t1)           	# prev->next = removido->next
+  	addi s3, s3, 1  	# incrementa o registrador do número de remoções              
+	li a0, 1		# retorno de sucesso
+	bnez t0, fim_remv	# if(removido-> next != null) return 1
+	lw s0, 0(t1)		# else atualizaMaior()
 fim_remv:
 	ret
-	
