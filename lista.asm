@@ -165,34 +165,34 @@ erro_insere:
 
 remove_por_indice:
 	mv t0, a0			# Salva em t0 o valor de a0, temp = head
-	mv t1, t0
+	mv t1, t0			# Salva em t1 o valor de t0, prev = temp
 	lw t0, 0(t0)			# Salva em t0 o valor em t0
 	beqz t0, vazia			# Verifica se a lista está vazia
 	
-	addi t3, zero, 0
-	beq t3, a1, remover_indice
+	addi t3, zero, 0		# inicia o contador de índices
+	beq t3, a1, remover_indice	# verifica se o índice atual corresponde ao índice do elemento a ser removido
 
 procura_indice:
 	mv t1, t0			# prev = temp
 	lw t0, 4(t0)			# temp = temp->next
-	addi t3, t3, 1
+	addi t3, t3, 1			# incrementa o contador do índice
 	beqz t0, att_maior_Rmv_indice	# Não encontrou o valor
 	
 	beq t3, a1, remover_indice	# temp->valor == valor
-	j procura_indice
+	j procura_indice		# retorna para procura_indice, para nova iteração na lista
 
 att_maior_Rmv_indice:
-	lw s0, 0(t1)
+	lw s0, 0(t1)			# atualiza o valor do maior elemento no registrador s0
 	j fim_remv_por_indice
 
 vazia:
         la a0, sem_elementos  
         li a7, 4              		# Comando para PrintString
-        ecall				# Chama
+        ecall				# Chama OS
         j fim_remv_por_indice
 
 remover_indice:
-	jal remove_item
+	jal remove_item			# chama a função geral de remoção
 
 fim_remv_por_indice:
 	ret
@@ -208,12 +208,12 @@ fim_remv_por_indice:
 
 remove_por_valor:
 	mv t0, a0			# Salva em t0 o valor de a0, temp = head
-	mv t1, t0
+	mv t1, t0			# Salva em t1 o valor de t0, prev = temp
 	lw t0, 0(t0)			# Salva em t0 o valor em t0
 	beqz t0, lista_vazia		# Verifica se a lista está vazia
 	
-	lw t2, (t0)
-	beq t1, a1, remover_valor
+	lw t2, (t0)			# Salva em t2 o valor de t1
+	beq t1, a1, remover_valor	# Verifica se o valor em t2 é igual ao valor do elemento a ser removido
 
 procura_valor:
 	mv t1, t0			# prev = temp
@@ -225,17 +225,17 @@ procura_valor:
 	j procura_valor
 
 att_maior_Rmv_valor:
-	lw s0, 0(t1)
+	lw s0, 0(t1)			# atualiza o valor do maior elemento no registrador s0
 	j fim_remv_por_valor
 
 lista_vazia:
         la a0, sem_elementos  
         li a7, 4              		# Comando para PrintString
-        ecall				# Chama
+        ecall				# Chama OS
         j fim_remv_por_valor
 
 remover_valor:
-	jal remove_item
+	jal remove_item			# chama a função geral de remoção
 
 fim_remv_por_valor:
 	ret
@@ -252,15 +252,15 @@ imprime_lista:
         li a7, 4              		# Comando para PrintString
         ecall				# Chama OS
 	
-	lw t0, 0(t2)			# Salva em a0 o valor de t2
-	beqz t0, nenhum_elemento	# Vai para label e t0 = 0
+	lw t0, 0(t2)			# Salva em t0 o valor de t2
+	beqz t0, nenhum_elemento	# Vai para label se t0 = 0, ou seja, não há elementos na lista
 
 imprimir:
-        lw a0, 0(t0)			# Salva em a0 o valor em t1
+        lw a0, 0(t0)			# Salva em a0 o valor em t0
         li a7, 1             		# Comando para PrintInteger
         ecall				# Chama OS
 
-        lw t0, 4(t0)          		# Salva em t0 o proximo endereço da lista
+        lw t0, 4(t0)          		# Salva em t0 o próximo endereço da lista
         beqz t0, fim_imprimir     	# Vai para fim_imprimir se t0 = 0, ou seja, estar no fim da lista
     
         la a0, separador  
@@ -369,14 +369,12 @@ input_a1a0:
 remove_item:
 	lw t0, 4(t0)            	# temp = temp->next
   	sw t0, 4(t1)            	# prev->next = temp->next
-  	addi s3, s3, 1  
+  	addi s3, s3, 1  		# incrementa o registrador do número de remoções
 	                    
 	la a0, txt_removido 
         li a7, 4              		# Comando para PrintString
-        ecall				# Chama 
-       
-	j fim_remv          
-
+        ecall				# Chama OS
+        
 fim_remv:
 	ret
 	
