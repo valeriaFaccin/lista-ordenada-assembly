@@ -164,9 +164,37 @@ erro_insere:
 #################################################################
 
 remove_por_indice:
-	la a0, n_implementado
-	li a7, 4		# Comando para PrintString
-	ecall			# Chama OS
+	mv t0, a0			# Salva em t0 o valor de a0, temp = head
+	mv t1, t0
+	lw t0, 0(t0)			# Salva em t0 o valor em t0
+	beqz t0, vazia			# Verifica se a lista está vazia
+	
+	addi t3, zero, 0
+	beq t3, a1, remover_indice
+
+procura_indice:
+	mv t1, t0			# prev = temp
+	lw t0, 4(t0)			# temp = temp->next
+	addi t3, t3, 1
+	beqz t0, att_maior_Rmv_indice	# Não encontrou o valor
+	
+	beq t3, a1, remover_indice	# temp->valor == valor
+	j procura_indice
+
+att_maior_Rmv_indice:
+	lw s0, 0(t1)
+	j fim_remv_por_indice
+
+vazia:
+        la a0, sem_elementos  
+        li a7, 4              		# Comando para PrintString
+        ecall				# Chama
+        j fim_remv_por_indice
+
+remover_indice:
+	jal remove_item
+
+fim_remv_por_indice:
 	ret
 	
 #################################################################
@@ -180,50 +208,36 @@ remove_por_indice:
 
 remove_por_valor:
 	mv t0, a0			# Salva em t0 o valor de a0, temp = head
+	mv t1, t0
 	lw t0, 0(t0)			# Salva em t0 o valor em t0
 	beqz t0, lista_vazia		# Verifica se a lista está vazia
 	
 	lw t2, (t0)
-	beq t1, a1, remover_inicio
+	beq t1, a1, remover_valor
 
 procura_valor:
 	mv t1, t0			# prev = temp
 	lw t0, 4(t0)			# temp = temp->next
-	beqz t0, fim_remove		# Não encontrou o valor
+	beqz t0, att_maior_Rmv_valor	# Não encontrou o valor
 	
 	lw t2, 0(t0)			# temp = temp->valor
-	beq t2, a1, remove_meio		# temp->valor == valor
+	beq t2, a1, remover_valor	# temp->valor == valor
 	j procura_valor
 
-remover_inicio:
-	lw t1, 4(t0)			# Carrega emt1 o endereço do elemento após o elemento removido
-	sw t1, 0(a0)
-	
-	la a0, txt_removido 
-        li a7, 4              		# Comando para PrintString
-        ecall				# Chama 
-	j fim_remove
-	
-remove_meio:
- 	lw t0, 4(t0)            	# t0 = t0->next
-  	sw t0, 4(t1)            	# prev->next = temp->next
-    	la a0, txt_removido     
-    	li a7, 4                
-    	ecall                   
-    	lw t1, 0(t1)
-    	beqz t1, atualiza_maior
-    	j fim_remove            
-
-atualiza_maior:
-	lw s0, 0(t0)
-	j fim_remove
+att_maior_Rmv_valor:
+	lw s0, 0(t1)
+	j fim_remv_por_valor
 
 lista_vazia:
         la a0, sem_elementos  
         li a7, 4              		# Comando para PrintString
-        ecall				# Chama 
+        ecall				# Chama
+        j fim_remv_por_valor
 
-fim_remove:
+remover_valor:
+	jal remove_item
+
+fim_remv_por_valor:
 	ret
 	
 #################################################################
@@ -346,3 +360,23 @@ input_a1a0:
 	mv a1, a0		# Move o valor para a1
 	la a0, head		# Carrega o head em a0
 	ret
+
+#################################################################
+# função: remoção geral de elementos 				#
+#   								#
+################################################################# 
+
+remove_item:
+	lw t0, 4(t0)            	# temp = temp->next
+  	sw t0, 4(t1)            	# prev->next = temp->next
+  	addi s3, s3, 1  
+	                    
+	la a0, txt_removido 
+        li a7, 4              		# Comando para PrintString
+        ecall				# Chama 
+       
+	j fim_remv          
+
+fim_remv:
+	ret
+	
