@@ -10,34 +10,33 @@
 head:		.word 0
 
 		#inputs simples para o usuario
-txt_inserido:	.string "foi inserido no índice: "
-txt_removido0:	.string "O elemento de "
+txt_inserido:	.string " foi inserido no índice: "
+txt_removido0:	.string " O elemento de "
 txt_removidoV:	.string "índice "
 txt_removidoI:	.string "valor "
 txt_removido1:	.string " foi removido."
-txt_input:	.string "\nDigite um número\n"
-txt_imprimir:	.string	"\nElementos da Lista\n"
-n_implementado:	.string "\nEsta operação não foi implementada\n"
-sem_elementos:	.string	"\nNão há elementos na lista\n"
+txt_input:	.string "\n Digite um número\n "
+txt_imprimir:	.string	"\n Elementos da Lista\n "
+sem_elementos:	.string	"\n Não há elementos na lista\n"
 separador:	.string " | "
-txt_maior: 	.string "\nMaior elemento da Lista: "
-txt_menor:	.string "\nMenor elemento da Lista: "
-txt_qtd_ins:	.string "\nNúmero(s) inserido(s): "
-txt_qtd_remv:	.string "\nNúmero(s) removido(s): "
-txt_list_vazia:	.string	"\nLista Vazia!"
-qtd_total:	.string "\nQuantidade de elementos na Lista: "
-txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***"
-txt_erro_in:	.string "Não foi posssível inserir na lista"
-txt_erro_remv:	.string	"Não foi possível remover na lista\n"
+txt_maior: 	.string "\n Maior elemento da Lista: "
+txt_menor:	.string "\n Menor elemento da Lista: "
+txt_qtd_ins:	.string "\n Número(s) inserido(s): "
+txt_qtd_remv:	.string "\n Número(s) removido(s): "
+txt_list_vazia:	.string	"\n Lista Vazia!"
+qtd_total:	.string "\n Quantidade de elementos na Lista: "
+txt_invalido:	.string "\n ***DIGITE UMA OPÇÃO VÁLIDA***"
+txt_erro_in:	.string " Não foi posssível inserir na lista"
+txt_erro_remv:	.string	" Não foi possível remover na lista\n"
 
 		#print do menu
-menu:		.ascii "\n\n*** MENU ***\n\n"
-op1:		.ascii "1 - Inserir\n"
-op2:		.ascii "2 - Remover por indice\n"
-op3:		.ascii "3 - Remover por valor\n"
-op4:		.ascii "4 - Imprimir lista\n"
-op5:		.ascii "5 - Estatísticas\n"
-op6:		.asciz "6 - Sair\n"
+menu:		.ascii "\n\n *** MENU ***\n\n"
+op1:		.ascii " 1 - Inserir\n"
+op2:		.ascii " 2 - Remover por indice\n"
+op3:		.ascii " 3 - Remover por valor\n"
+op4:		.ascii " 4 - Imprimir lista\n"
+op5:		.ascii " 5 - Estatísticas\n"
+op6:		.asciz " 6 - Sair\n "
 
 		.text
 main:
@@ -192,7 +191,6 @@ erro_insere:
 #################################################################
 
 remove_por_indice:
-	#mv t0, a0			# Salva em t0 o valor de a0, temp = head
 	bltz a1, erro			# Se a1 < 0, indice menor que a lista
 	sub t0, s2, s3			# Quantidade de elementos na lista
 	bge a1, t0, erro		# Se a1 >= n, indice maior que a lista
@@ -212,9 +210,9 @@ erro:
         ret
 
 remover_indice:
-	lw t0, 4(t1)	# removido = prev->next
-	lw a1, 0(t0)	# a1 = removido->valor
-	mv t2, ra	# salva o retorno
+	lw t0, 4(t1)			# removido = prev->next
+	lw a1, 0(t0)			# a1 = removido->valor
+	mv t2, ra			# salva o retorno
 	jal remove_item			# chama a função geral de remoção
 	jr t2
 	
@@ -228,15 +226,8 @@ remover_indice:
 #################################################################
 
 remove_por_valor:
-	#mv t0, a0			# Salva em t0 o valor de a0, temp = head
-	#mv t1, a0			# Salva em t1 o valor de t0, prev = temp
 	addi t0, a0, -4
 	li t3, 0
-	#lw t0, 0(t0)			# Salva em t0 o valor em t0
-	#beqz t0, lista_vazia		# Verifica se a lista está vazia
-	
-	#lw t2, (t0)			# Salva em t2 o valor de t1
-	#beq t1, a1, remover_valor	# Verifica se o valor em t2 é igual ao valor do elemento a ser removido
 
 procura_valor:
 	mv t1, t0			# prev = temp
@@ -247,22 +238,16 @@ procura_valor:
 	addi t3, t3, 1			# i++
 	bge a1, t2, procura_valor	# temp->valor < valor
 
-#att_maior_Rmv_valor:
-#	lw s0, 0(t1)			# atualiza o valor do maior elemento no registrador s0
-#	j fim_remv_por_valor
-
 nao_encontrou:
         li a0, -1
         li a1, -1
         ret
 
 remover_valor:
-	mv t2, ra	#salva o endereco
-	jal remove_item			# chama a função geral de remoção
+	mv t2, ra			# Salva o endereco
+	jal remove_item			# Chama a função geral de remoção
 	mv a1, t3
 	jr t2
-#fim_remv_por_valor:
-#	ret
 	
 #################################################################
 # função: void imprime_lista(int *head)				#
@@ -387,16 +372,18 @@ input_a1a0:
 
 #################################################################
 # função: remoção geral de elementos 				#
-#   								#
+# entrada: t0 e t1						#
+# saida: retorna a0	  					#
 ################################################################# 
 
 remove_item:
 	lw t0, 4(t0)       	# temp = removido->next
   	sw t0, 4(t1)           	# prev->next = removido->next
-  	addi s3, s3, 1  	# incrementa o registrador do número de remoções              
+  	addi s3, s3, 1  	# Incrementa o registrador do número de remoções              
 	
 	bnez t0, fim_remv	# if(removido-> next != null) return 1
 	lw s0, 0(t1)		# else atualizaMaior()
+	
 fim_remv:
-	li a0, 1		# retorno de sucesso
+	li a0, 1		# Retorno de sucesso
 	ret
