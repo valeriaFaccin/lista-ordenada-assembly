@@ -11,7 +11,10 @@ head:		.word 0
 
 		#inputs simples para o usuario
 txt_inserido:	.string "foi inserido no índice: "
-txt_removido:	.string "foi removido\n"
+txt_removido0:	.string "O elemento de "
+txt_removidoV:	.string "índice "
+txt_removidoI:	.string "valor "
+txt_removido1:	.string " foi removido."
 txt_input:	.string "\nDigite um número\n"
 txt_imprimir:	.string	"\nElementos da Lista\n"
 n_implementado:	.string "\nEsta operação não foi implementada\n"
@@ -23,12 +26,12 @@ txt_qtd_ins:	.string "\nNúmero(s) inserido(s): "
 txt_qtd_remv:	.string "\nNúmero(s) removido(s): "
 txt_list_vazia:	.string	"\nLista Vazia!"
 qtd_total:	.string "\nQuantidade de elementos na Lista: "
-txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***\n"
+txt_invalido:	.string "\n***DIGITE UMA OPÇÃO VÁLIDA***"
 txt_erro_in:	.string "Não foi posssível inserir na lista"
 txt_erro_remv:	.string	"Não foi possível remover na lista\n"
 
 		#print do menu
-menu:		.ascii "\n*** MENU ***\n\n"
+menu:		.ascii "\n\n*** MENU ***\n\n"
 op1:		.ascii "1 - Inserir\n"
 op2:		.ascii "2 - Remover por indice\n"
 op3:		.ascii "3 - Remover por valor\n"
@@ -48,8 +51,6 @@ loop_menu:
 	ecall			# Chama o OS
 	li a7, 5		# Comando para ReadInt
 	ecall			# Chama o OS
-	li t0, 6
-	beq t0, a0, fim		# Se opção = 6 encerra 
 	li t0, 1		# Insere inteiro
 	beq t0, a0, trata_insere 
 	li t0, 2		# Remover por índece
@@ -60,6 +61,8 @@ loop_menu:
 	beq t0, a0, trata_print
 	li t0, 5		# Estatísticas
 	beq t0, a0, trata_estatistica
+	li t0, 6
+	beq t0, a0, fim		# Se opção = 6 encerra 
 
 invalido:
 	la a0,txt_invalido	# Salva a mensagem "inválida" para retorno
@@ -88,12 +91,36 @@ erro_ins:
 trata_removeI:
 	jal input_a1a0
 	jal remove_por_indice
-	j loop_menu		# Volta para o loop
+	bltz a0, erro_rmv
+	la t0, txt_removidoI
+	j output
 	
 trata_removeV:
 	jal input_a1a0
 	jal remove_por_valor
-	j loop_menu		# Volta para o loop
+	bltz a0, erro_rmv
+	la t0, txt_removidoV
+	j output		
+	
+output:
+	li a7, 4
+	la a0, txt_removido0
+	ecall
+	mv a0, t0
+	ecall
+	mv a0, a1
+	li a7, 1
+	ecall
+	la a0, txt_removido1
+	li a7, 4
+	ecall
+	j loop_menu
+	
+erro_rmv:
+	la a0, txt_erro_remv
+	li a7, 4
+	ecall
+	j loop_menu
 	
 trata_print:
 	la a0, head
@@ -122,18 +149,18 @@ insere_inteiro:
 	mv t2, zero		# Indice, i = 0
 	lw t0, 0(a0)		# Salva em t0 o valor do endereço de a0
 	mv t1, a0		# Move o valor para t1
+	
+	
+procura_fim:
 	beqz t0, att_maior	# Se t0 for 0, vai para insere
 	lw t3, (t0)
 	bge t3, a1, insere
 	
-procura_fim:
 	addi t2, t2, 1		# Incrementa o índice i ++
 	addi t1, t0, 4 		# ponteiro para o proximo t1 = temp->next
 	lw t0, 4(t0)		# Passa para a proxima posição t0 = temp->next->next
 	
-	beqz t0, att_maior	# Ou até achar o fim
-	lw t3, (t0)		# Pega o valor do proximo elemento t3
-	bge a1, t3, procura_fim # Vai procurar até achar alguém maior 
+	j procura_fim
 
 att_maior:
 	mv s0, a1
@@ -154,6 +181,7 @@ insere:
 erro_insere:
 	li a0, -1		#indice -1 se for erro
 	ret	
+	
 #################################################################
 # função: int remove_por_indice(int *head, int indice);  	#
 #   remove um elemento da lista pelo indice			#
@@ -185,7 +213,7 @@ erro:
 
 remover_indice:
 	lw t0, 4(t1)	# removido = prev->next
-	sw a1, 0(t0)	# a1 = removido->valor
+	lw a1, 0(t0)	# a1 = removido->valor
 	mv t2, ra	# salva o retorno
 	jal remove_item			# chama a função geral de remoção
 	jr t2
