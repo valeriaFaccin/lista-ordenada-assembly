@@ -1,5 +1,5 @@
 # lista-ordenada-assembly
-![Badge em Desenvolvimento](http://img.shields.io/static/v1?label=STATUS&message=EM%20DESENVOLVIMENTO&color=GREEN&style=for-the-badge)
+<img src="http://img.shields.io/static/v1?label=STATUS&message=CONCLUIDO&color=GREEN&style=for-the-badge"/>
 
 ## Descrição
 Um projeto para implementar uma lista ordenada em Assembly RISC-V e executado no simulador RARS, com a capacidade de armazenar números inteiros. 
